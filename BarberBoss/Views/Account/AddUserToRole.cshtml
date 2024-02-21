@@ -1,0 +1,16 @@
+﻿@model BarberBoss.Models.UserRole
+@{
+    ViewBag.Title = "AddUserToRole";
+}
+
+<h2>AddUserToRole</h2>
+
+
+@using (Html.BeginForm("AddUserToRole", "Account", FormMethod.Post))
+{
+    @Html.DropDownListFor(model => model.UserId, new SelectList(Model.Users, "Id", "Email"), new { @class = "form-control" })
+    @Html.DropDownListFor(model => model.RoleId, new SelectList(Model.Roles, "Id", "Name"), new { @class = "form-control" })
+    <input type="submit" value="Add User to Role" class="btn btn-info" />
+}
+
+

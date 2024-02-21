@@ -1,0 +1,113 @@
+﻿@model BarberBoss.Models.PartialAppointment
+@{
+    ViewBag.Title = "BookAppointment";
+}
+
+<h2>Book Appointment</h2>
+
+@using (Html.BeginForm("BookAppointment", "Appointments", FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+
+    @Html.HiddenFor(model => model.Id)
+
+<div class="form-group">
+    <label for="SelectedServiceId">Select Service:</label>
+    @*@Html.DropDownList("ServicesIds", null, "Choose a service", new { @class = "form-control", @id = "serviceDropdown" })
+        @Html.ValidationMessageFor(model => model.OfferId, "", new { @class = "text-danger" })*@
+
+    @Html.DropDownListFor(model => model.OfferId, ViewBag.ServicesIds as SelectList, "Choose a service", new { @class = "form-control", @id = "serviceDropdown" })
+    @Html.ValidationMessageFor(model => model.OfferId, "", new { @class = "text-danger" })
+
+</div>
+
+    <div class="form-group">
+        <label for="SelectedBarberId">Select Barber:</label>
+        @Html.DropDownListFor(model => model.BarberId, Enumerable.Empty<SelectListItem>(), "Choose a barber", new { @class = "form-control", @id = "barberDropdown" })
+    </div>
+
+    
+
+
+
+    <div class="form-group">
+        <div class="col-md-10">
+            @Html.HiddenFor(model => model.startTime)
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-md-10">
+            @Html.HiddenFor(model => model.startTimeString)
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-md-10">
+            @Html.HiddenFor(model => model.bookTime)
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-md-10">
+            @Html.HiddenFor(model => model.bookTimeString)
+        </div>
+    </div>
+
+
+    <button type="submit" class="btn btn-primary">Confirm Appointment</button>
+}
+
+@section Scripts{
+    <script>
+        $(document).ready(function () {
+
+            
+
+
+
+            // On change event for the service dropdown
+            $('#serviceDropdown').change(function () {
+                var selectedServiceId = $(this).val();
+                console.log(selectedServiceId);
+
+                var startTimeValue = document.getElementById("startTime").value;
+                console.log("StartTimeValue: " + startTimeValue);
+
+                var selectedTimeDate = new Date(startTimeValue);
+                console.log("Selected time date: " + selectedTimeDate);
+
+                var selectedTimeMilliseconds = selectedTimeDate.getTime();
+                console.log("Selected time in milliseconds: " + selectedTimeMilliseconds);
+
+                // Make an AJAX request to get the barbers for the selected service
+                $.ajax({
+                    type: 'get',
+                    url: '@Url.Action("GetBarbersForService", "Appointments")',
+                    data: { serviceId: selectedServiceId, selectedTime: selectedTimeMilliseconds },
+                    success: function (barbers) {
+                        // Clear the existing options
+                        $('#barberDropdown').empty();
+
+                        // Add the new options based on the received data
+                        $.each(barbers, function (index, barber) {
+                            var option = $('<option>', {
+                                value: barber.Value,
+                                text: barber.Text
+                            });
+
+                            if (!barber.IsAvailable) {
+                                option.attr('disabled', 'disabled');
+                                option.text(barber.Text + ' - Unavailable');
+                            }
+
+                            $('#barberDropdown').append(option);
+                        });
+                    },
+                    error: function (error) {
+                        console.log(error);
+                    }
+                });
+            });
+        });
+    </script>
+
+}
+

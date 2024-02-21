@@ -1,0 +1,268 @@
+﻿@model List<BarberBoss.Models.Appointment>
+
+@if (Model.Count > 0)
+{
+    <div class="d-none d-md-block">
+        <!-- Large screens: Display appointments in a table -->
+        <table class="table" id="appTable">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Service</th>
+                    <th>Barber</th>
+                    <th>Status</th>
+                    <th>Review Grade</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var appointment in Model)
+                {
+                    <tr>
+                        <td>@appointment.StartTime</td>
+                        <td>@appointment.ServiceOffer.Title</td>
+                        <td>@appointment.Barber.Name</td>
+                        <td>@(appointment.StartTime < DateTime.Now ? "Completed" : "Upcoming")</td>
+                        <td>
+                            @if (appointment.ReviewGrade.HasValue && appointment.ReviewGrade.Value != 0)
+                            {
+                                @appointment.ReviewGrade
+                            }
+                            else
+                            {
+                                <!-- Display nothing if there is no review grade -->
+                            }
+                        </td>
+                        <td>
+                            @if ((appointment.IsBooked && appointment.StartTime < DateTime.Now) && (appointment.ReviewGrade == null || appointment.ReviewGrade == 0.0))
+                            {
+                                <button class="btn btn-primary leave-review-btn" data-toggle="modal" data-target="#reviewModal" data-appointment-id="@appointment.Id">
+                                    Leave Review
+                                </button>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="d-md-none">
+        <!-- Small screens: Display appointments as cards -->
+        <div class="row">
+            @foreach (var appointment in Model)
+            {
+                <div class="col-12 mt-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">@appointment.Barber.Name - @appointment.ServiceOffer.Title</h5>
+                            <p class="card-text">Date: @appointment.StartTime</p>
+                            <p class="card-text">Status: @(appointment.StartTime < DateTime.Now ? "Completed" : "Upcoming")</p>
+                            <p class="card-text">
+                                @if (appointment.ReviewGrade.HasValue && appointment.ReviewGrade.Value != 0)
+                                {
+                                    @appointment.ReviewGrade
+                                }
+                                else
+                                {
+                                    <!-- Display nothing if there is no review grade -->
+                                }
+                            </p>
+                            @if ((appointment.IsBooked && appointment.StartTime < DateTime.Now) && (appointment.ReviewGrade == null || appointment.ReviewGrade == 0.0))
+                            {
+                                <button class="btn btn-primary leave-review-btn" data-toggle="modal" data-target="#reviewModal" data-appointment-id="@appointment.Id">
+                                    Leave Review
+                                </button>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Review Modal -->
+    <div class="modal fade" id="reviewModal" tabindex="-1" role="dialog" aria-labelledby="reviewModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="reviewModalLabel">Rate Your Appointment</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="reviewModalContent">
+                    <!-- Form content will be dynamically added here -->
+                    <form id="reviewForm" action="/Appointments/LeaveReview" method="post">
+                        <input type="hidden" name="appointmentId" id="appointmentId" value="" />
+                        <label for="grade">Rating (1 to 5 stars): </label>
+                        <input type="number" name="grade" min="1" max="5" required />
+                        <button type="submit" id="submitReviewBtn" class="btn btn-primary">Submit Review</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+}
+else
+{
+    <h2>You don't have any appointments scheduled.</h2>
+}
+
+
+@section Scripts {
+    @*<script>
+            document.addEventListener('DOMContentLoaded', function () {
+                var leaveReviewButtons = document.querySelectorAll('.leave-review-btn');
+
+                leaveReviewButtons.forEach(function (button) {
+                    button.addEventListener('click', function () {
+                        var appointmentId = this.getAttribute('data-appointment-id');
+                        console.log("AppointmentId: " + appointmentId);
+
+                        // Construct the form HTML dynamically
+                        var formHtml = '<form action="/Appointments/LeaveReview" method="post">';
+                        formHtml += '<input type="hidden" name="appointmentId" value="' + appointmentId + '" />';
+                        formHtml += '<label for="grade">Rating (1 to 5 stars): </label>';
+                        formHtml += '<input type="number" name="grade" min="1" max="5" required />';
+                        formHtml += '<button type="submit" class="btn btn-primary">Submit Review</button>';
+                        formHtml += '</form>';
+
+                        // Set the modal content and show the modal
+                        document.getElementById('reviewModalContent').innerHTML = formHtml;
+                        var reviewModal = new bootstrap.Modal(document.getElementById('reviewModal'));
+                        reviewModal.show();
+                    });
+                });
+            });
+        </script>*@
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            $("#appTable").DataTable();
+            var leaveReviewButtons = document.querySelectorAll('.leave-review-btn');
+
+            leaveReviewButtons.forEach(function (button) {
+                button.addEventListener('click', function () {
+                    var appointmentId = this.getAttribute('data-appointment-id');
+                    console.log("AppointmentId: " + appointmentId);
+
+                    // Set the appointmentId in the form
+                    document.getElementById('appointmentId').value = appointmentId;
+
+                    // Show the modal
+                    var reviewModal = new bootstrap.Modal(document.getElementById('reviewModal'));
+                    reviewModal.show();
+                });
+            });
+        });
+    </script>
+}
+
+
+
+
+
+
+@*
+    @model List<BarberBoss.Models.Appointment>
+
+
+    @if (Model.Count > 0)
+    {
+        <!-- Display data as a table on larger screens -->
+        <table class="table d-none d-md-table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Barber</th>
+                    <th>Status</th>
+                    <th>Review Grade</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var appointment in Model)
+                {
+                    <tr>
+                        <td>@appointment.StartTime</td>
+                        <td>@appointment.Barber.Name</td>
+                        <td>@(appointment.StartTime < DateTime.Now ? "Completed" : "Upcoming")</td>
+                        <td>
+                            @if (appointment.ReviewGrade.HasValue && appointment.ReviewGrade.Value != 0)
+                            {
+                                @appointment.ReviewGrade
+                            }
+                            else
+                            {
+                                <!-- Display nothing if there is no review grade -->
+                            }
+                        </td>
+                        <td>
+                            @if ((appointment.IsBooked && appointment.StartTime < DateTime.Now) && (appointment.ReviewGrade == null || appointment.ReviewGrade == 0.0))
+                            {
+                                <button class="btn btn-primary leave-review-btn" data-toggle="modal" data-target="#reviewModal_@appointment.Id" data-appointment-id="@appointment.Id">
+                                    Leave Review
+                                </button>
+                                <!-- Review Modal -->
+                                <div class="modal fade" id="reviewModal_@appointment.Id" tabindex="-1" role="dialog" aria-labelledby="reviewModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="reviewModalLabel">Rate Your Appointment</h5>
+                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>
+                                            <div class="modal-body" id="reviewModalContent">
+                                                <!-- Form content will be dynamically added here -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <!-- Display data as div elements on smaller screens -->
+        <div class="d-md-none">
+            <div class="row">
+                @foreach (var appointment in Model)
+                {
+                    <div class="col-12 mt-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Date: @appointment.StartTime</h5>
+                                <p class="card-text">Barber: @appointment.Barber.Name</p>
+                                <p class="card-text">Status: @(appointment.StartTime < DateTime.Now ? "Completed" : "Upcoming")</p>
+                                <p class="card-text">
+                                    Review Grade:
+                                    @if (appointment.ReviewGrade.HasValue && appointment.ReviewGrade.Value != 0)
+                                    {
+                                        @appointment.ReviewGrade
+                                    }
+                                    else
+                                    {
+                                        <!-- Display nothing if there is no review grade -->
+                                    }
+                                </p>
+                                <!-- Display button only for completed appointments without a review -->
+                                @if ((appointment.StartTime < DateTime.Now) && (appointment.ReviewGrade == null || appointment.ReviewGrade == 0.0))
+                                {
+                                    <button class="btn btn-primary leave-review-btn" data-toggle="modal" data-target="#reviewModal_@appointment.Id" data-appointment-id="@appointment.Id">
+                                        Leave Review
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+*@

@@ -1,0 +1,99 @@
+﻿@model BarberBoss.Models.Barber
+
+@{
+    ViewBag.Title = "Details";
+}
+
+<h2>Details</h2>
+
+<div>
+    <h4>Barber</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.Name)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Name)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Email)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Email)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.InstagramProfile)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.InstagramProfile)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.FacebookProfile)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.FacebookProfile)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.ImageFile)
+        </dt>
+
+        <dd>
+            <img src="@Url.Content(Model.ImagePath)" style="max-width: 300px" />
+            @*@Html.DisplayFor(model => model.ImagePath)*@
+        </dd>
+
+    </dl>
+</div>
+
+@if (Model.Appointments.Any())
+{
+    <div>
+        <h4>Appointments</h4>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Appointment ID</th>
+                    <th>Start Time</th>
+                    <th>Client</th>
+                    <!-- Add other appointment properties as needed -->
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var appointment in Model.Appointments)
+                {
+                    <tr>
+                        <td>@appointment.Id</td>
+                        <td>@appointment.StartTime</td>
+                        <td>@appointment.ApplicationUser.Email</td>
+                        <!-- Add other appointment properties as needed -->
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+<p>
+    @Html.ActionLink("Edit", "Edit", new { id = Model.Id }) |
+    @Html.ActionLink("Back to List", "Index")
+</p>
+
+
+@section Scripts{
+
+    <script>
+        $(document).ready(function () {
+            $("#table").DataTable();
+        })
+    </script>
+
+}
+

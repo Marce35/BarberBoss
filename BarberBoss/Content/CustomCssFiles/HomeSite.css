@@ -1,0 +1,89 @@
+﻿.custom-background {
+    background-color: black;
+    color: white;
+}
+
+
+.custom-image {
+    height: 200px; /* Set a fixed height for the images */
+    object-fit: cover;
+}
+
+.welcome-image {
+    width: 100%;
+    height: auto;
+    opacity: 0.75;
+}
+
+.welcome-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: white;
+    overflow: hidden;
+    white-space: nowrap;
+    background: rgba(0, 0, 0, 0.7); /* Adjust the alpha value for transparency */
+    padding: 20px; /* Add padding for better visibility and aesthetics */
+    width: 80%; /* Set the width as a percentage of the parent container */
+    max-width: 100%; /* Set the maximum width to limit its size */
+}
+
+#welcomeText {
+    opacity: 0;
+    animation: slideIn 2s ease-out forwards; /* Adjust the duration and timing function as needed */
+    font-size: 5vw;
+    max-width: 100%; /* Set the maximum width to ensure responsiveness */
+}
+
+#welcomeMessage {
+    font-size: 2vw; /* Set font size as a percentage of the viewport width */
+    max-width: 100%; /* Set the maximum width to ensure responsiveness */
+}
+
+
+.booking-btn {
+    font-size: 4vh !important;
+    font-style: oblique !important;
+    font-weight: bold !important;
+    padding: 2vh, 4vh;
+    background-color: rgba(0, 0, 0, 0.8); 
+    transition: background-color 0.3s ease; /* Smooth transition effect */
+}
+
+.booking-btn:hover {
+    background-color: rgba(255, 165, 0, 1); /* Full opacity on hover */
+}
+
+
+
+
+
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.icon-img {
+    width: 4vh !important; /* Adjust the width as needed */
+    height: 4vh !important; /* Adjust the height as needed */
+    max-width: 6vh;
+    max-height: 6vh;
+    margin-right: 5px !important; /* Add margin for spacing between icon and text */
+}
+
+
+/*Services Page*/
+
+.custom-text-gray {
+    color: gray!important;
+}

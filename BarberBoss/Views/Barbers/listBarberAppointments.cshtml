@@ -1,0 +1,74 @@
+﻿@model List<BarberBoss.Models.Appointment>
+@{
+    ViewBag.Title = "listBarberAppointments";
+}
+
+
+@{
+    ViewBag.Title = "My Appointments";
+}
+
+<h2>My Appointments</h2>
+
+@if (Model.Count > 0)
+{
+    <!-- Display data as a table on larger screens -->
+    <div class="d-none d-md-block">
+        <table class="table" id="appTable">
+            <thead>
+                <tr>
+                    <th>AppointmentId</th>
+                    <th>Start Time</th>
+                    <th>Completed/Upcoming</th>
+                    <th>Service</th>
+                    <th>Price</th>
+                    <th>Client Email</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var appointment in Model)
+                {
+                    <tr>
+                        <td>@appointment.Id</td>
+                        <td>@appointment.StartTime</td>
+                        <td>@(appointment.StartTime < DateTime.Now ? "Completed" : "Upcoming")</td>
+                        <td>@appointment.ServiceOffer.Title</td>
+                        <td>@appointment.ServiceOffer.Price</td>
+                        <td>@appointment.ApplicationUser.Email</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Display data as cards on smaller screens -->
+    <div class="d-md-none">
+        @foreach (var appointment in Model)
+        {
+            <div class="card appointment-card">
+                <div class="card-body">
+                    <p class="card-text">Start Time: @appointment.StartTime</p>
+                    <p class="card-text">Status: @(appointment.StartTime < DateTime.Now ? "Completed" : "Upcoming")</p>
+                    <p class="card-text">Service: @appointment.ServiceOffer.Title</p>
+                    <p class="card-text">Price: @appointment.ServiceOffer.Price</p>
+                    <p class="card-text">Client Email: @appointment.ApplicationUser.Email</p>
+                </div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <p>No appointments found.</p>
+}
+
+
+@section Scripts{
+
+    <script>
+        $(document).ready(function () {
+            $("#appTable").DataTable();
+        })
+    </script>
+
+}

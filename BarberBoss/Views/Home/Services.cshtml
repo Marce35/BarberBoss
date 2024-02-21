@@ -1,0 +1,36 @@
+﻿@model IEnumerable<BarberBoss.Models.ServiceOffer>
+@{
+    ViewBag.Title = "Services";
+}
+
+
+
+<main class="container">
+    <link rel="stylesheet" href="~/Content/CustomCssFiles/HomeSite.css" />
+
+    <div class="row mt-4">
+        <h2 class="col-12 text-center">Our Services</h2>
+
+        @foreach (var service in Model)
+        {
+            <div class="col-md-4 mt-3">
+                <div class="card">
+                    @if (!string.IsNullOrEmpty(service.ImagePath))
+                    {
+                        <img src="@Url.Content(service.ImagePath)" class="card-img-top img-fluid custom-image" alt="Service Image">
+                    }
+                <div class="card-body custom-background text-center">
+                    <h5 class="card-title text-white font-weight-bold">@service.Title</h5>
+                    <p class="card-text custom-text-gray">Duration: @service.Duration Minutes</p>
+                    <p class="card-text custom-text-gray"><strong>Price:</strong> @service.Price DEN</p>
+
+                    <!-- Book Now Button -->
+                    <a href="@Url.Action("Calendar", "Appointments")" class="btn btn-warning btn-block mt-3" style="width:80%; font-size:3vh; font-weight:bold">Reserve</a>
+                </div>
+                </div>
+            </div>
+        }
+    </div>
+</main>
+
+

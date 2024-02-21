@@ -1,0 +1,227 @@
+﻿
+@{
+    ViewBag.Title = "Calendar";
+}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.css" />
+
+<h2>Calendar</h2>
+
+<div id="calendar"></div>
+<style>
+    #calendar {
+        font-size: 14px; /* Adjust the font size as needed */
+    }
+
+    .fc-time-grid-event {
+        height: auto !important; /* Allow events to expand vertically */
+    }
+
+    .fc-time-grid-event .fc-content {
+        white-space: normal; /* Allow text to wrap within the event */
+        text-align: center; /* Center the text */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+</style>
+
+
+
+@section Scripts{
+    <!--<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>-->
+    @*<script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.js"></script>*@
+
+    <!--<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>-->
+    <!-- moment lib -->
+    <script src='https://cdn.jsdelivr.net/npm/moment@2.27.0/min/moment.min.js'></script>
+
+    <!-- fullcalendar bundle -->
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
+
+    <!-- the moment-to-fullcalendar connector. must go AFTER the moment lib -->
+    <script src='https://cdn.jsdelivr.net/npm/@("@")fullcalendar/moment@6.1.10/index.global.min.js'></script>
+
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+
+
+
+            // Fetch and initialize the calendar
+            fetchAppointmentsAndInitializeCalendar();
+
+            function fetchAppointmentsAndInitializeCalendar() {
+                $.ajax({
+                    type: 'get',
+                    url: '/Appointments/GetAppointments',
+                    success: function (data) {
+                        // Convert appointments to FullCalendar events format
+                        var events = convertAppointmentsToEvents(data);
+                        // Initialize the calendar with the events
+                        initializeCalendar(events);
+                        console.log("Got the appointments data");
+                    },
+                    error: function (error) {
+                        console.error('Failed to fetch appointments.');
+                    }
+                });
+            }
+
+            // Function to convert appointments to FullCalendar events format
+            function convertAppointmentsToEvents(appointments) {
+                var events = [];
+
+                for (var event in appointments) {
+                    // Convert appointment to FullCalendar event format
+                    events.push({
+                        title: appointments[event].Title,
+                        start: appointments[event].StartTime,
+                        end: appointments[event].EndTime,     
+                        extendedProps: {
+                            id: appointments[event].Id,
+                            price: appointments[event].Price,
+                            isBooked: appointments[event].IsBooked,
+                            book: appointments[event].BookTime,
+                            clientId: appointments[event].ClientId,
+                            barberId: appointments[event].BarberId,
+                            barberName: appointments[event].BarberName
+                        },
+                        backgroundColor: "green"
+                    });
+                    console.log("Barber ID = " + appointments[event].BarberId);
+                    console.log("Barber Name = " + appointments[event].BarberName);
+                }
+
+                return events;
+            }
+
+
+
+            function initializeCalendar(events) {
+                var currentTime = moment();
+                var currentDay = new Date().toISOString().slice(0, 10);
+                var minTimeToday = moment().startOf('hour').add(30, 'minutes').format('HH:mm:ss');
+
+                var calendarEl = document.getElementById('calendar');
+
+                var calendar = new FullCalendar.Calendar(calendarEl, {
+                    validRange: {
+                        start: currentTime
+                    },
+                    initialView: 'timeGridWeek',
+                    expandRows: true,
+                    slotEventOverlap: false,
+                    eventOverlap: false,
+                    contentHeight: 600,
+                    businessHours: {
+                        dow: [1, 2, 3, 4, 5, 6], // Monday - Saturday
+                        start: '10:00',
+                        end: '20:30',
+                    },
+                    weekends: true, // Show Saturday
+                    slotDuration: '01:00:00', // 30 minutes slots
+                    slotLabelInterval: '01:00', // Show time every 1 hour
+                    slotLabelFormat: {
+                        hour: 'numeric',
+                        minute: '2-digit',
+                        omitZeroMinute: false,
+                        meridiem: 'short'
+                    },
+                    slotMinTime: '10:00:00',
+                    slotMaxTime: '20:30:00',
+                    selectable: true,
+                    events: events,
+                    dateClick: function (info) {
+                        console.log("Entered dateClick function");
+
+                        if (info.date.getDay() !== 0) {
+                            var selectedDateTime = info.date.getTime();
+                            var currentDateTime = new Date();
+                            console.log(selectedDateTime);
+                            console.log(currentDateTime);
+
+                            // Check if the selected date and time are in the future
+                            if (selectedDateTime > currentDateTime.getTime()) {
+                                var time = info.dateStr.split('T');
+                                var finalTime = time[0] + 'T';
+                                var displayTime = time[0] + " ";
+
+                                var t = time[1].split('+');
+                                if (t.length > 1) {
+                                    finalTime += t[0];
+                                    displayTime += t[0] + ".000";
+                                } else {
+                                    finalTime += time[1].split('-')[0];
+                                    displayTime += time[1].split('-')[0] + ".000";
+                                }
+
+                                var isBooked = false;
+
+                                for (var id in events) {
+                                    console.log(events[id]);
+                                    console.log(finalTime);
+                                    console.log(time);
+                                    console.log(displayTime);
+
+                                    if (displayTime == events[id].start) {
+                                        isBooked = true;
+                                    }
+                                }
+
+                                if (!isBooked && confirm("Reserve the appointment " + finalTime + "?")) {
+                                    $.ajax({
+                                        type: 'post',
+                                        url: '/Appointments/CreateAppointment',
+                                        data: {
+                                            startTime: finalTime
+                                        },
+                                        success: function (id) {
+                                            window.location.replace(window.location.origin + "/Appointments/BookAppointment/" + id);
+                                        },
+                                        error: function (err) {
+                                            console.log(err);
+                                        }
+                                    });
+                                }
+                            } else {
+                                alert("Cannot book appointments in the past.");
+                            }
+                        } else {
+                            alert("We are closed on Sundays.");
+                        }
+                    },
+                    selectAllow: function (selectInfo) {
+                        // Disable clicking on all-day slots
+                        /*return selectInfo.allDay === false;*/
+                        return selectInfo.start.getDay() !== 0 && selectInfo.allDay === false;
+                    },
+                    
+                });
+
+                calendar.render();
+            }
+        });
+
+        function setGrid(e) {
+            if (window.innerWidth > 960) {
+                calendar.changeView('timeGridWeek', today)
+            }
+            else if (window.innerWidth > 600) {
+                calendar.changeView('timeGridFourDay', today)
+            }
+            else {
+                calendar.changeView('timeGridDay', today)
+            }
+        }
+
+        window.onresize = setGrid
+    </script>
+
+}
+
+
+
